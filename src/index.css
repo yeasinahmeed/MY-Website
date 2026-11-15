@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    scroll-behavior: smooth;
+    background-color: #f9f9f7;
+    color: #111210;
+  }
+
+  h1, h2, h3, .font-display {
+    font-family: var(--font-display);
+  }
+
+  .tabular-nums {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* Variable font weight shift on hover */
+.vf-shift {
+  font-variation-settings: "wght" 500;
+  transition: font-variation-settings 220ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 180ms ease;
+}
+
+.vf-shift:hover {
+  font-variation-settings: "wght" 750;
+}
+
+.vf-nav {
+  font-variation-settings: "wght" 450;
+  transition: font-variation-settings 180ms cubic-bezier(0.16, 1, 0.3, 1),
+    color 180ms ease;
+}
+
+.vf-nav:hover {
+  font-variation-settings: "wght" 680;
+}
+
+/* Outlined display typography for viewport fill */
+.text-outlined-ink {
+  -webkit-text-stroke: 1.25px #111210;
+  color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f3f3ef;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c8c8c0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #8a8a82;
+}
