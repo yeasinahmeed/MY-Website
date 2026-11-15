@@ -58,6 +58,7 @@ const EMPTY_PROJECT: ProjectItem & { id?: number; published: boolean; sortOrder:
 export function AdminPage({ onExit }: { onExit: () => void }) {
   const [csrfToken, setCsrfToken] = useState('');
   const [authChecked, setAuthChecked] = useState(false);
+  const [backendAvailable, setBackendAvailable] = useState(true);
   const [authenticated, setAuthenticated] = useState(false);
   const [usernameInput, setUsernameInput] = useState('');
   const [passwordInput, setPasswordInput] = useState('');
@@ -177,18 +178,32 @@ export function AdminPage({ onExit }: { onExit: () => void }) {
   useEffect(() => {
     let active = true;
     Promise.all([
-      fetch('/api/auth/csrf', { credentials: 'same-origin' }).then((r) => r.json()),
-      fetch('/api/auth/session', { credentials: 'same-origin' }).then((r) => r.json()),
+      fetch('/api/auth/csrf', { credentials: 'same-origin' }).then(async (r) => {
+        if (!r.ok || !(r.headers.get('content-type') || '').includes('application/json')) {
+          throw new Error('No backend');
+        }
+        return r.json();
+      }),
+      fetch('/api/auth/session', { credentials: 'same-origin' }).then(async (r) => {
+        if (!r.ok || !(r.headers.get('content-type') || '').includes('application/json')) {
+          throw new Error('No backend');
+        }
+        return r.json();
+      }),
     ])
       .then(([csrfJson, sessJson]) => {
         if (!active) return;
+        setBackendAvailable(true);
         setCsrfToken((csrfJson as { csrfToken?: string }).csrfToken || '');
         const isAuth = Boolean((sessJson as { authenticated?: boolean }).authenticated);
         setAuthenticated(isAuth);
         setAuthChecked(true);
       })
       .catch(() => {
-        if (active) setAuthChecked(true);
+        if (active) {
+          setBackendAvailable(false);
+          setAuthChecked(true);
+        }
       });
     return () => {
       active = false;
@@ -390,6 +405,31 @@ export function AdminPage({ onExit }: { onExit: () => void }) {
     return (
       <div className="min-h-screen bg-[#F9F9F7] flex items-center justify-center p-6">
         <p className="font-mono text-xs text-[#6E6E67]">Checking session...</p>
+      </div>
+    );
+  }
+
+  if (!backendAvailable) {
+    return (
+      <div className="min-h-screen bg-[#F9F9F7] flex flex-col items-center justify-center p-6">
+        <div className="w-full max-w-md bg-white border border-[#E4E4DF] rounded-2xl p-8 space-y-5">
+          <p className="font-mono text-xs text-[#6E6E67]">Static Hosting Notice</p>
+          <h1 className="font-display text-2xl font-semibold text-[#111210]">
+            Admin CMS requires live server
+          </h1>
+          <p className="text-sm leading-relaxed text-[#52524C]">
+            This static GitHub Pages deployment serves the public portfolio only. To sign in, edit
+            database content, or view private messages, open the full-stack deployment running the
+            Express server and PostgreSQL database.
+          </p>
+          <button
+            type="button"
+            onClick={onExit}
+            className="w-full py-2.5 px-4 text-sm font-semibold text-[#111210] bg-[#DFC07C] hover:bg-[#C59B43] rounded-lg cursor-pointer transition-colors"
+          >
+            Return to public site
+          </button>
+        </div>
       </div>
     );
   }

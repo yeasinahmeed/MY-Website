@@ -604,6 +604,10 @@ async function createServer() {
     app.use(vite.middlewares);
   } else {
     const distDir = path.resolve(__dirname, 'dist');
+    app.use('/projects/assets', express.static(path.join(distDir, 'assets')));
+    app.use('/admin/assets', express.static(path.join(distDir, 'assets')));
+    app.use('/projects/media', express.static(path.join(distDir, 'media')));
+    app.use('/admin/media', express.static(path.join(distDir, 'media')));
     app.use(express.static(distDir, { index: false }));
     app.get('*', (req, res) => {
       if (req.path.startsWith('/admin')) {

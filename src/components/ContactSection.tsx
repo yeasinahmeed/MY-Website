@@ -49,6 +49,14 @@ export function ContactSection({ settings }: ContactSectionProps) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(parsed.data),
       });
+      const ct = res.headers.get('content-type') || '';
+      if (!ct.includes('application/json')) {
+        setStatus({
+          type: 'error',
+          text: `This static preview does not have a live mail server. Please email directly at ${settings.email}.`,
+        });
+        return;
+      }
       const json = (await res.json()) as { ok?: boolean; message?: string; error?: string };
 
       if (!res.ok) {
@@ -71,7 +79,7 @@ export function ContactSection({ settings }: ContactSectionProps) {
     } catch {
       setStatus({
         type: 'error',
-        text: 'Network error while submitting your inquiry. Please email directly if urgent.',
+        text: `Unable to reach the server right now. Please email directly at ${settings.email}.`,
       });
     } finally {
       setSubmitting(false);

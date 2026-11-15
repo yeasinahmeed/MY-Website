@@ -1,6 +1,8 @@
 import { Suspense, lazy, useEffect, useState } from 'react';
 import { ArrowLeft, X } from 'lucide-react';
 import type { ProjectItem } from '../types/portfolio.ts';
+import { resolveAssetUrl } from '../lib/assets.ts';
+import { STATIC_PORTFOLIO } from '../data/staticPortfolio.ts';
 import { MagneticButton } from '../components/MagneticButton.tsx';
 import { ResultRing } from '../components/SkillProgressBar.tsx';
 
@@ -24,10 +26,25 @@ export function ProjectDetailPage({ slug, initialProject, onBack }: ProjectDetai
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'auto' });
     let active = true;
-    if (!initialProject) setLoading(true);
+    const staticFallback = STATIC_PORTFOLIO.projects.find((p) => p.slug === slug) || null;
+    if (!initialProject && !staticFallback) setLoading(true);
+    if (window.location.hostname.endsWith('.github.io')) {
+      const resolved = initialProject || staticFallback;
+      if (resolved) {
+        setProject(resolved);
+        setActiveImage(resolved.coverImage);
+        setError(null);
+      }
+      setLoading(false);
+      return;
+    }
+
     fetch(`/api/projects/${encodeURIComponent(slug)}`)
       .then(async (res) => {
-        if (!res.ok) throw new Error('Case study not found.');
+        const ct = res.headers.get('content-type') || '';
+        if (!res.ok || !ct.includes('application/json')) {
+          throw new Error('Case study not found.');
+        }
         return (await res.json()) as ProjectItem;
       })
       .then((data) => {
@@ -38,8 +55,15 @@ export function ProjectDetailPage({ slug, initialProject, onBack }: ProjectDetai
         }
       })
       .catch((err: unknown) => {
-        if (active && !initialProject) {
-          setError(err instanceof Error ? err.message : 'Unable to load case study.');
+        if (active) {
+          const fallback = initialProject || staticFallback;
+          if (fallback) {
+            setProject(fallback);
+            setActiveImage(fallback.coverImage);
+            setError(null);
+          } else {
+            setError(err instanceof Error ? err.message : 'Unable to load case study.');
+          }
         }
       })
       .finally(() => {
@@ -92,7 +116,7 @@ export function ProjectDetailPage({ slug, initialProject, onBack }: ProjectDetai
   }
 
   const galleryImages = project.gallery.length > 0 ? project.gallery : [project.coverImage];
-  const displaySrc = activeImage || project.coverImage;
+  const displaySrc = resolveAssetUrl(activeImage || project.coverImage);
 
   return (
     <main className="py-12 lg:py-20 bg-[#F9F9F7]">
@@ -253,7 +277,7 @@ export function ProjectDetailPage({ slug, initialProject, onBack }: ProjectDetai
                   >
                     {!failedImages[src] ? (
                       <img
-                        src={src}
+                        src={resolveAssetUrl(src)}
                         alt={`${project.title} artifact ${idx + 1}`}
                         referrerPolicy="no-referrer"
                         onError={() => setFailedImages((prev) => ({ ...prev, [src]: true }))}
@@ -314,7 +338,7 @@ export function ProjectDetailPage({ slug, initialProject, onBack }: ProjectDetai
             <X className="w-5 h-5" />
           </button>
           <img
-            src={lightboxSrc}
+            src={resolveAssetUrl(lightboxSrc)}
             alt={project.title}
             referrerPolicy="no-referrer"
             onClick={(e) => e.stopPropagation()}

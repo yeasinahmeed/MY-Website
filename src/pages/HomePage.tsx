@@ -2,6 +2,7 @@ import { Suspense, lazy, useEffect, useMemo, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowUpRight, Check } from 'lucide-react';
 import type { PortfolioPayload, ProjectItem } from '../types/portfolio.ts';
+import { resolveAssetUrl } from '../lib/assets.ts';
 import { ScrollVideoSection } from '../components/ScrollVideoSection.tsx';
 import { MagneticButton } from '../components/MagneticButton.tsx';
 import { KineticHeadline } from '../components/KineticHeadline.tsx';
@@ -181,7 +182,7 @@ export function HomePage({ data, onSelectProject, onNavigateAdmin }: HomePagePro
               <div className="rounded-2xl overflow-hidden border border-[#E4E4DF] bg-[#F2F2EE] aspect-[3/4]">
                 {!failedImages[settings.aboutImageUrl] ? (
                   <img
-                    src={settings.aboutImageUrl}
+                    src={resolveAssetUrl(settings.aboutImageUrl)}
                     alt={`${settings.brandName} working at studio desk`}
                     referrerPolicy="no-referrer"
                     onError={() =>
@@ -300,8 +301,8 @@ export function HomePage({ data, onSelectProject, onNavigateAdmin }: HomePagePro
       <ScrollVideoSection
         title={settings.videoSectionTitle}
         subtitle={settings.videoSectionSubtitle}
-        posterUrl={settings.videoPosterUrl}
-        videoUrl={settings.videoUrl}
+        posterUrl={resolveAssetUrl(settings.videoPosterUrl)}
+        videoUrl={resolveAssetUrl(settings.videoUrl)}
       />
 
       {/* 5. PROJECTS / CASE STUDIES SECTION */}
@@ -364,7 +365,7 @@ export function HomePage({ data, onSelectProject, onNavigateAdmin }: HomePagePro
                       <div className="aspect-[4/3] w-full bg-[#ECECE7] overflow-hidden border-b border-[#E4E4DF]">
                         {!failedImages[project.coverImage] ? (
                           <img
-                            src={project.coverImage}
+                            src={resolveAssetUrl(project.coverImage)}
                             alt={project.title}
                             referrerPolicy="no-referrer"
                             onError={() =>

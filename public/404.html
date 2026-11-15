@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Redirecting — Yeasin Ahmed</title>
+    <script>
+      (function () {
+        var path = window.location.pathname;
+        var search = window.location.search || '';
+        var hash = window.location.hash || '';
+        var segments = path.split('/').filter(Boolean);
+        // Preserve GitHub Pages repository subpath (/<repo>/) and move SPA route into hash
+        var repoBase = segments.length > 0 ? '/' + segments[0] + '/' : '/';
+        var subRoute =
+          segments.length > 1 ? '/' + segments.slice(1).join('/') : '';
+        if (subRoute === '/admin' || subRoute.indexOf('/admin/') === 0 || subRoute.indexOf('/projects/') === 0) {
+          window.location.replace(repoBase + '#' + subRoute + search + hash);
+        } else if (segments.length > 0) {
+          window.location.replace(repoBase + hash);
+        } else {
+          window.location.replace('/');
+        }
+      })();
+    </script>
+  </head>
+  <body></body>
+</html>
